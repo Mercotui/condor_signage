@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html>
+<html style="height:100%">
 <head>
     <meta charset="UTF-8">
     <title>Condor</title>
@@ -7,22 +7,32 @@
     <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.css" />
 </head>
 
-<body style=" max-width: 100%;overflow-x: hidden;">
-    <div style="float:left">
-        Hey ;)
+<body style="background:#ddd; margin:0; width:100%; height:100%; overflow:hidden;">
+    <div style="background:#333; width:60%; height:100%; float:left; overflow:hidden;">
+        <div style="margin:2em; color:white;">
+            Hey ;)<br/> there <br/> put transit data here
+        </div>
     </div>
-    <div style="float:right;">
-        <div class="clock" style="transform: scale(2);margin:8em;"></div>
-        <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.min.js"></script>
-        <script type="text/javascript">
-        var clock;
-        $(document).ready(function() {
-            clock = $('.clock').FlipClock({
-                clockFace: 'TwentyFourHourClock',
-                showSeconds: false
+    <div style="width:40%; height:100%; float:right; overflow:hidden;">
+        <div style="margin:4em; text-align: center;">
+            Date (DD MMM)here
+        </div>
+        <div style="margin:4em; text-align: center;">
+            <div class="clock" style="display: inline-block; width: auto; transform:scale(2);"></div>
+            <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.min.js"></script>
+            <script type="text/javascript">
+            var clock;
+            $(document).ready(function() {
+                clock = $('.clock').FlipClock({
+                    clockFace: 'TwentyFourHourClock',
+                    showSeconds: false
+                });
             });
-        });
-        </script>
+            </script>
+        </div>
+        <div style="margin:4em; text-align: center;">
+            Weather here
+        </div>
     </div>
 </body>
 </html>

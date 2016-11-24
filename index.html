@@ -10,8 +10,47 @@
 <body style="background:#ddd; margin:0; width:100%; height:100%; overflow:hidden;">
     <!-- Left hand collum -->
     <div style="background:#333; box-shadow:5px 0 5px -2px #888; width:60%; height:100%; float:left; overflow:hidden;">
-        <div style="margin:2em; color:white;">
-            Hey ;)<br/> there <br/> put transit data here
+        <div style="margin:2em; color:white;" onclick="config_transit()">
+            <div id="transit">
+                Hey ;)<br/> there <br/> put transit data here
+            </div>
+            <script type="text/javascript">
+            function config_transit(){
+                var key;
+                var origin_id;
+                var destination_id;
+                while(key == null) {
+                    key = prompt("Please enter your google API-key", localStorage.getItem("transit_key"));
+                }
+                while(origin_id == null) {
+                    origin_id = prompt("Please enter your google location id for origin", localStorage.getItem("transit_origin_id"));
+                }
+                while(destination_id == null) {
+                    destination_id = prompt("Please enter your google location id for origin", localStorage.getItem("transit_destination_id"));
+                }
+                localStorage.setItem("transit_key", key);
+                localStorage.setItem("transit_origin_id", origin_id);
+                localStorage.setItem("transit_destination_id", destination_id);
+                update_transit();
+            }
+            function update_transit(){
+                var key = localStorage.getItem("transit_key");
+                var origin_id = localStorage.getItem("transit_origin_id");
+                var destination_id = localStorage.getItem("transit_destination_id");
+
+                if (key != null && origin_id != null && destination_id != null){
+                    var complete_url = "https://maps.googleapis.com/maps/api/directions/json?origin=place_id:"+
+                    origin_id+"&destination=place_id:"+destination_id+"&mode=transit&alternatives=true&key="+
+                    key+"&callback=?";
+
+                    //$.getJSON(complete_url, parse_transit_response);
+                    $.ajax({url: complete_url, crossDomain : true, dataType: 'json', success: parse_transit_response});
+                }
+            }
+            function parse_transit_response(result,status,xhr){
+                document.getElementById("transit").innerHTML = ("GIT GUD");
+            }
+            </script>
         </div>
     </div>
 
@@ -83,10 +122,10 @@
                     var city = localStorage.getItem("weather_city_id");
 
                     if (key != null && city != null){
-                        $.getJSON( "http://api.openweathermap.org/data/2.5/weather?id="+city+"&APPID="+key+"&units=metric", parse_response);
+                        $.getJSON( "http://api.openweathermap.org/data/2.5/weather?id="+city+"&APPID="+key+"&units=metric", parse_weather_response);
                     }
                 }
-                function parse_response(data){
+                function parse_weather_response(data){
                     var curr_temp;
                     var max_temp;
                     var min_temp;
@@ -110,9 +149,11 @@
         update_date();
         init_clock();
         update_weather();
+        update_transit();
 
         setInterval(update_date, 60000);
         setInterval(update_weather, 60000);
+        setInterval(update_transit, 60000);
     });
     </script>
 </body>

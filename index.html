@@ -79,6 +79,7 @@
 
             if (key != null && origin_id != null && destination_id != null){
                 if(transit_api == undefined){
+                    document.getElementById("transit_error").innerHTML = "Attempting to load API";
                     transit_api_load();
                 } else if (transit_api == null) {
                     document.getElementById("transit_error").innerHTML = "Error API not loaded";
@@ -90,13 +91,15 @@
                         travelMode: 'TRANSIT'
                     }, function(response, status) {
                         if (status === 'OK') {
+                            document.getElementById("transit_error").innerHTML = "";
                             parse_transit_response(response);
                         } else {
                             document.getElementById("transit_error").innerHTML = "Error API Request: " + status;
                         }
                     });
-                    document.getElementById("transit_error").innerHTML = "";
                 }
+            } else {
+                document.getElementById("transit_error").innerHTML = "Click HERE to configure the transit API";
             }
         }
 

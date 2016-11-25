@@ -13,93 +13,116 @@
         <div style="margin:2em; color:white;" onclick="config_transit()">
             <div id="transit_error">
             </div>
-            <div id="transit">
-                Hey ;)<br/> there <br/> put transit data here
-            </div>
-            <script type="text/javascript">
-            var transit_api;
-            function transit_api_load(){
-                transit_api = null;
-                var key = localStorage.getItem("transit_key");
-                var script = document.createElement('script');
-                script.src = "https://maps.googleapis.com/maps/api/js?key="+key+"&callback=transit_api_loaded";
-                document.getElementsByTagName('head')[0].appendChild(script);
+            <table id="transit_table" style='color:#444; font: normal 40px "Tex Gyre Heros", GyreHeros-Bold, sans-serif; font-weight:bold; line-height: 80%;'></table>
+
+            <style>
+            table {
+                font-family: arial, sans-serif;
+                border-collapse: collapse;
+                width: 100%;
             }
 
-            function transit_api_loaded() {
-                if(transit_api == null){
-                    transit_api = new google.maps.DirectionsService;
-                }
-                update_transit();
+            td, th {
+                text-align: center;
+                padding: 8px;
             }
 
-            function config_transit(){
-                var key;
-                var origin_id;
-                var destination_id;
-                while(key == null) {
-                    key = prompt("Please enter your google API-key", localStorage.getItem("transit_key"));
-                }
-                while(origin_id == null) {
-                    origin_id = prompt("Please enter your google location id for origin", localStorage.getItem("transit_origin_id"));
-                }
-                while(destination_id == null) {
-                    destination_id = prompt("Please enter your google location id for destination", localStorage.getItem("transit_destination_id"));
-                }
-                localStorage.setItem("transit_key", key);
-                localStorage.setItem("transit_origin_id", origin_id);
-                localStorage.setItem("transit_destination_id", destination_id);
-                update_transit();
+            tr:nth-child(even) {
+                background-color: #dddddd;
             }
+            </style>
+        </div>
+        <script type="text/javascript">
+        var transit_api;
+        function transit_api_load(){
+            transit_api = null;
+            var key = localStorage.getItem("transit_key");
+            var script = document.createElement('script');
+            script.src = "https://maps.googleapis.com/maps/api/js?key="+key+"&callback=transit_api_loaded";
+            document.getElementsByTagName('head')[0].appendChild(script);
+        }
 
-            function update_transit(){
-                var key = localStorage.getItem("transit_key");
-                var origin_id = localStorage.getItem("transit_origin_id");
-                var destination_id = localStorage.getItem("transit_destination_id");
-
-                if (key != null && origin_id != null && destination_id != null){
-                    if(transit_api == undefined){
-                        transit_api_load();
-                    } else if (transit_api == null) {
-                        document.getElementById("transit_error").innerHTML = "Error API not loaded";
-                    } else {
-                        transit_api.route({
-                            origin: {'placeId': origin_id},
-                            destination: {'placeId': destination_id},
-                            provideRouteAlternatives: true,
-                            travelMode: 'TRANSIT'
-                        }, function(response, status) {
-                            if (status === 'OK') {
-                                parse_transit_response(response);
-                            } else {
-                                document.getElementById("transit_error").innerHTML = "Error API Request: " + status;
-                            }
-                        });
-                        document.getElementById("transit_error").innerHTML = "";
-                    }
-                }
+        function transit_api_loaded() {
+            if(transit_api == null){
+                transit_api = new google.maps.DirectionsService;
             }
+            update_transit();
+        }
 
-            function parse_transit_response(result){
-                var parsed = "GIT GUD <ul>";
-                result.routes.forEach(function(route) {
-                    parsed += "<li>";
-                    route.legs[0].steps.forEach(function(step) {
-                        if(step.travel_mode == "WALKING"){
-                            parsed += "walk "+step.duration.text+";   ";
-                        } else if(step.travel_mode == "TRANSIT"){
-                            parsed += step.transit.line.vehicle.name+" "+step.transit.line.short_name+";   ";
+        function config_transit(){
+            var key;
+            var origin_id;
+            var destination_id;
+            while(key == null) {
+                key = prompt("Please enter your google API-key", localStorage.getItem("transit_key"));
+            }
+            while(origin_id == null) {
+                origin_id = prompt("Please enter your google location id for origin", localStorage.getItem("transit_origin_id"));
+            }
+            while(destination_id == null) {
+                destination_id = prompt("Please enter your google location id for destination", localStorage.getItem("transit_destination_id"));
+            }
+            localStorage.setItem("transit_key", key);
+            localStorage.setItem("transit_origin_id", origin_id);
+            localStorage.setItem("transit_destination_id", destination_id);
+            update_transit();
+        }
+
+        function update_transit(){
+            var key = localStorage.getItem("transit_key");
+            var origin_id = localStorage.getItem("transit_origin_id");
+            var destination_id = localStorage.getItem("transit_destination_id");
+
+            if (key != null && origin_id != null && destination_id != null){
+                if(transit_api == undefined){
+                    transit_api_load();
+                } else if (transit_api == null) {
+                    document.getElementById("transit_error").innerHTML = "Error API not loaded";
+                } else {
+                    transit_api.route({
+                        origin: {'placeId': origin_id},
+                        destination: {'placeId': destination_id},
+                        provideRouteAlternatives: true,
+                        travelMode: 'TRANSIT'
+                    }, function(response, status) {
+                        if (status === 'OK') {
+                            parse_transit_response(response);
                         } else {
-                            parsed += step.travel_mode+step.duration.text+";   ";
+                            document.getElementById("transit_error").innerHTML = "Error API Request: " + status;
                         }
                     });
-                    parsed += "</li>";
-                });
-                parsed += "</ul>";
-                document.getElementById("transit").innerHTML = parsed;
+                    document.getElementById("transit_error").innerHTML = "";
+                }
             }
-            </script>
-        </div>
+        }
+
+        function parse_transit_response(result){
+            var parsed = "<tr><th>depart</th><th>line</th><th>arive</th></tr>";
+            result.routes.forEach(function(route) {
+                if(route.legs[0].departure_time == undefined){
+                    return;
+                    /*skip a route if theres no set departure time (happens if no transit is involved),
+                    since these never change, they are not relevant to display*/
+                }
+                parsed += "<tr>";
+                parsed += "<td>"+route.legs[0].departure_time.text+"</td><td>";
+                route.legs[0].steps.forEach(function(step) {
+                    if(step.travel_mode == "WALKING"){
+                        if(step.duration.value > 90){ /*only show walks longer than 90*/
+                            parsed += "walk "+step.duration.text+";   ";
+                        }
+                    } else if(step.travel_mode == "TRANSIT"){
+                        parsed += "<img src='"+step.transit.line.vehicle.icon+"'> "+step.transit.line.vehicle.name+" "+step.transit.line.short_name+";   ";
+                    } else {
+                        parsed += step.travel_mode+step.duration.text+";   ";
+                    }
+                });
+                parsed += "</td><td>"+route.legs[0].arrival_time.text+"</td>";
+                parsed += "</tr>";
+            });
+            document.getElementById("transit_table").innerHTML = parsed;
+        }
+        </script>
     </div>
 
     <!-- Right hand collum -->

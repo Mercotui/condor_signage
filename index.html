@@ -10,13 +10,16 @@
 <body style="background:#ddd; margin:0; width:100%; height:100%; overflow:hidden;">
     <!-- Left hand collum -->
     <div style="background:#333; box-shadow:5px 0 5px -2px #888; width:60%; height:100%; float:left; overflow:hidden;">
-        <div style="margin:2em; color:white;" onclick="config_transit()">
+        <div style="margin:4em; color:white;" onclick="config_transit()">
             <div id="transit_error">
             </div>
-            <table id="transit_table" style='color:#444; font: normal 40px "Tex Gyre Heros", GyreHeros-Bold, sans-serif; font-weight:bold; line-height: 80%;'></table>
+            <table id="transit_table"></table>
 
             <style>
             table {
+                color:#ddd;
+                font: normal 40px "Tex Gyre Heros", GyreHeros-Bold, sans-serif;
+                font-weight:bold;
                 font-family: arial, sans-serif;
                 border-collapse: collapse;
                 width: 100%;
@@ -28,7 +31,8 @@
             }
 
             tr:nth-child(even) {
-                background-color: #dddddd;
+                color: #333;
+                background-color: #ddd;
             }
             </style>
         </div>
@@ -99,25 +103,36 @@
         function parse_transit_response(result){
             var parsed = "<tr><th>depart</th><th>line</th><th>arive</th></tr>";
             result.routes.forEach(function(route) {
-                if(route.legs[0].departure_time == undefined){
+                var leg = route.legs[0]; //all of our routes (should probalby) have a single leg
+                if(leg.departure_time == undefined){
                     return;
                     /*skip a route if theres no set departure time (happens if no transit is involved),
                     since these never change, they are not relevant to display*/
                 }
+                function pad(value) {if(value < 10) {return '0' + value;} else {return value;}};
+                var depart_time = leg.departure_time.value.getHours()+":"+pad(leg.departure_time.value.getMinutes());
+                var arrive_time = leg.arrival_time.value.getHours()+":"+pad(leg.arrival_time.value.getMinutes());
                 parsed += "<tr>";
-                parsed += "<td>"+route.legs[0].departure_time.text+"</td><td>";
-                route.legs[0].steps.forEach(function(step) {
+                parsed += "<td>"+depart_time+"</td><td>";
+                var first_step = true;
+                leg.steps.forEach(function(step) {
+                    if(first_step == false){
+                        parsed += " &#8594; ";
+                    }
                     if(step.travel_mode == "WALKING"){
-                        if(step.duration.value > 90){ /*only show walks longer than 90*/
-                            parsed += "walk "+step.duration.text+";   ";
+                        if(step.duration.value < 90){
+                            return; /*walks of less than a minute and a half are irrelevant*/
+                        } else {
+                            parsed += "<img src='"+"https://maps.gstatic.com/mapfiles/transit/iw2/6/walk.png"+"'> "+step.duration.text;
                         }
                     } else if(step.travel_mode == "TRANSIT"){
-                        parsed += "<img src='"+step.transit.line.vehicle.icon+"'> "+step.transit.line.vehicle.name+" "+step.transit.line.short_name+";   ";
+                        parsed += "<img src='"+step.transit.line.vehicle.icon+"'> "+step.transit.line.short_name;
                     } else {
-                        parsed += step.travel_mode+step.duration.text+";   ";
+                        parsed += step.travel_mode+step.duration.text;
                     }
+                    first_step = false;
                 });
-                parsed += "</td><td>"+route.legs[0].arrival_time.text+"</td>";
+                parsed += "</td><td>"+arrive_time+"</td>";
                 parsed += "</tr>";
             });
             document.getElementById("transit_table").innerHTML = parsed;

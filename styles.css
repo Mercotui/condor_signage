@@ -1,0 +1,102 @@
+html {
+    height:100%;
+}
+body {
+    font: normal 100px "Tex Gyre Heros", GyreHeros-Bold, sans-serif;
+    background:#ddd;
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+}
+
+table {
+    color:#ddd;
+    font-size: 30px;
+    font-weight: bold;
+    font-family: arial, sans-serif;
+    border-collapse: collapse;
+    white-space: nowrap;
+    width: 100%;
+}
+
+td, th {
+    text-align: center;
+    padding: 8px;
+}
+
+tr:nth-child(even) {
+    color: #333;
+    background-color: #ddd;
+}
+
+.left_hand {
+    background:#333;
+    box-shadow:5px 0 5px -2px #888;
+    width:60%;
+    height:100%;
+    float:left;
+    overflow:hidden;
+}
+
+.right_hand{
+    width:40%;
+    height:100%;
+    float:right;
+    overflow:hidden;
+}
+
+.left_hand .content {
+    margin: 1em;
+    color:white;"
+}
+
+.right_hand .spacer {
+    height:calc(1/3*100%);
+    text-align: center;
+    display:table;
+    width:100%;
+}
+
+.right_hand .spacer .content {
+    vertical-align:middle;
+    display:table-cell;
+}
+
+.date {
+    color:#444;
+    font-weight:bold; line-height: 80%;
+    text-shadow: 2px 2px 2px #000;
+}
+
+.date .day{
+    font-size:50px;
+}
+
+.clock {
+    display:inline-block;
+    width:auto;
+    transform:scale(1.5);
+}
+
+.weather {
+    color:#444;
+    font-weight:bold;
+    line-height: 60%;
+}
+
+.weather .current {
+    font-size:100px;
+}
+
+.weather .minimum {
+    color:#777;
+    font-size:30px;
+    padding:1em;
+}
+
+.weather .maximum {
+    color:#555;
+    font-size:30px;
+    padding:1em;
+}

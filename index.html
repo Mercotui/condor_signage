@@ -1,250 +1,51 @@
 <!DOCTYPE html>
-<html style="height:100%">
+<html>
 <head>
     <meta charset="UTF-8">
     <title>Condor</title>
     <script type="text/javascript" src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.2/jquery.min.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.min.js"></script>
+    <script type="text/javascript" src="script.js"></script>
     <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.css" />
+    <link type="text/css" rel="stylesheet" href="styles.css" />
 </head>
 
-<body style="background:#ddd; margin:0; width:100%; height:100%; overflow:hidden;">
+<body>
     <!-- Left hand collum -->
-    <div style="background:#333; box-shadow:5px 0 5px -2px #888; width:60%; height:100%; float:left; overflow:hidden;">
-        <div style="margin:4em; color:white;" onclick="config_transit()">
-            <div id="transit_error">
-            </div>
+    <div class="left_hand">
+        <div class="content" onclick="config_transit()">
+            <div id="transit_error"></div>
             <table id="transit_table"></table>
-
-            <style>
-            table {
-                color:#ddd;
-                font: normal 30px "Tex Gyre Heros", GyreHeros-Bold, sans-serif;
-                font-weight:bold;
-                font-family: arial, sans-serif;
-                border-collapse: collapse;
-                white-space: nowrap;
-                width: 100%;
-            }
-
-            td, th {
-                text-align: center;
-                padding: 8px;
-            }
-
-            tr:nth-child(even) {
-                color: #333;
-                background-color: #ddd;
-            }
-            </style>
         </div>
-        <script type="text/javascript">
-        var transit_api;
-        function transit_api_load(){
-            transit_api = null;
-            var key = localStorage.getItem("transit_key");
-            var script = document.createElement('script');
-            script.src = "https://maps.googleapis.com/maps/api/js?key="+key+"&callback=transit_api_loaded";
-            document.getElementsByTagName('head')[0].appendChild(script);
-        }
-
-        function transit_api_loaded() {
-            if(transit_api == null){
-                transit_api = new google.maps.DirectionsService;
-            }
-            update_transit();
-        }
-
-        function config_transit(){
-            var key;
-            var origin_id;
-            var destination_id;
-            while(key == null) {
-                key = prompt("Please enter your google API-key", localStorage.getItem("transit_key"));
-            }
-            while(origin_id == null) {
-                origin_id = prompt("Please enter your google location id for origin", localStorage.getItem("transit_origin_id"));
-            }
-            while(destination_id == null) {
-                destination_id = prompt("Please enter your google location id for destination", localStorage.getItem("transit_destination_id"));
-            }
-            localStorage.setItem("transit_key", key);
-            localStorage.setItem("transit_origin_id", origin_id);
-            localStorage.setItem("transit_destination_id", destination_id);
-            update_transit();
-        }
-
-        function update_transit(){
-            var key = localStorage.getItem("transit_key");
-            var origin_id = localStorage.getItem("transit_origin_id");
-            var destination_id = localStorage.getItem("transit_destination_id");
-
-            if (key != null && origin_id != null && destination_id != null){
-                if(transit_api == undefined){
-                    document.getElementById("transit_error").innerHTML = "Attempting to load API";
-                    transit_api_load();
-                } else if (transit_api == null) {
-                    document.getElementById("transit_error").innerHTML = "Error API not loaded";
-                } else {
-                    transit_api.route({
-                        origin: {'placeId': origin_id},
-                        destination: {'placeId': destination_id},
-                        provideRouteAlternatives: true,
-                        travelMode: 'TRANSIT'
-                    }, function(response, status) {
-                        if (status === 'OK') {
-                            document.getElementById("transit_error").innerHTML = "";
-                            parse_transit_response(response);
-                        } else {
-                            document.getElementById("transit_error").innerHTML = "Error API Request: " + status;
-                        }
-                    });
-                }
-            } else {
-                document.getElementById("transit_error").innerHTML = "Click HERE to configure the transit API";
-            }
-        }
-
-        function parse_transit_response(result){
-            var parsed = "<tr><th>depart</th><th>line</th><th>arive</th></tr>";
-            result.routes.forEach(function(route) {
-                var leg = route.legs[0]; //all of our routes (should probalby) have a single leg
-                if(leg.departure_time == undefined){
-                    return;
-                    /*skip a route if theres no set departure time (happens if no transit is involved),
-                    since these never change, they are not relevant to display*/
-                }
-                function pad(value) {if(value < 10) {return '0' + value;} else {return value;}};
-                var depart_time = leg.departure_time.value.getHours()+":"+pad(leg.departure_time.value.getMinutes());
-                var arrive_time = leg.arrival_time.value.getHours()+":"+pad(leg.arrival_time.value.getMinutes());
-                parsed += "<tr>";
-                parsed += "<td>"+depart_time+"</td><td>";
-                var first_step = true;
-                leg.steps.forEach(function(step) {
-                    if(first_step == false){
-                        parsed += " &#8594; ";
-                    }
-                    if(step.travel_mode == "WALKING"){
-                        if(step.duration.value < 90){
-                            return; /*walks of less than a minute and a half are irrelevant*/
-                        } else {
-                            parsed += "<img src='"+"https://maps.gstatic.com/mapfiles/transit/iw2/6/walk.png"+"'> "+step.duration.text;
-                        }
-                    } else if(step.travel_mode == "TRANSIT"){
-                        parsed += "<img src='"+step.transit.line.vehicle.icon+"'> "+step.transit.line.short_name;
-                    } else {
-                        parsed += step.travel_mode+step.duration.text;
-                    }
-                    first_step = false;
-                });
-                parsed += "</td><td>"+arrive_time+"</td>";
-                parsed += "</tr>";
-            });
-            document.getElementById("transit_table").innerHTML = parsed;
-        }
-        </script>
     </div>
 
     <!-- Right hand collum -->
-    <div style="width:40%; height:100%; float:right; overflow:hidden;">
+    <div class="right_hand">
         <!-- Date box -->
-        <div style="height:calc(1/3*100%); text-align: center; display:table; width:100%;">
-            <div style="vertical-align:middle; display:table-cell;">
-                <div style='color:#444; font: normal 100px "Tex Gyre Heros", GyreHeros-Bold, sans-serif; font-weight:bold; line-height: 80%; text-shadow: 2px 2px 2px #000;'>
-                    <span id="day" style="font-size:50px;"></span><br/>
-                    <span id="date" style="font-size:100px;"></span>
+        <div class="spacer">
+            <div class="content">
+                <div class="date">
+                    <div id="day" class="day"></div>
+                    <div id="date"></div>
                 </div>
-                <script type="text/javascript">
-                function update_date(){
-                    //var d_names = ['S','MON','TUE','WED','THU','FRI','SAT'];
-                    var d_names = ["SUNDAY", "MONDAY", "TUESDAY", "WEDNESDAY", "THURSDAY", "FRIDAY", "SATURDAY"];
-                    var m_names = new Array("JAN", "FEB", "MAR", "APR", "MAY", "JUN", "JUL", "AUG", "SEP", "OCT", "NOV", "DEC");
-                    var d = new Date();
-                    var curr_day = d.getDay();
-                    var curr_date = d.getDate();
-                    var curr_month = d.getMonth();
-                    document.getElementById("date").innerHTML = (curr_date+" "+m_names[curr_month]);
-                    document.getElementById("day").innerHTML = d_names[curr_day];
-                }
-                </script>
             </div>
         </div>
         <!-- Time box -->
-        <div style="height:calc(1/3*100%); text-align: center; display:table; width:100%;">
-            <div style="vertical-align:middle; display:table-cell;">
-                <div class="clock" style="display:inline-block; width:auto; transform:scale(1.5);"></div>
-                <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.min.js"></script>
-                <script type="text/javascript">
-                var clock;
-                function init_clock() {
-                    clock = $('.clock').FlipClock({
-                        clockFace: 'TwentyFourHourClock',
-                        showSeconds: false
-                    });
-                }
-                </script>
+        <div class="spacer">
+            <div class="content">
+                <div class="clock"></div>
             </div>
         </div>
         <!-- Weather box -->
-        <div style="height:calc(1/3*100%); text-align:center; display:table; width:100%;">
-            <div style="vertical-align:middle; display:table-cell;" onclick="config_weather()">
-                <div style='color:#444; font: normal 100px "Tex Gyre Heros", GyreHeros-Bold, sans-serif; font-weight:bold; line-height: 60%;'>
-                    <span id="weather_curr" style="font-size:100px;">CLICK HERE</span><br/>
-                    <span id="weather_min" style="color:#777; font-size:30px; padding:1em;">To edit weather api settings</span>
-                    <span id="weather_max" style="color:#555; font-size:30px; padding:1em;"></span>
+        <div class="spacer">
+            <div class="content" onclick="config_weather()">
+                <div class="weather">
+                    <span id="weather_curr" class="current">CLICK HERE</span><br/>
+                    <span id="weather_min" class="minimum">To edit weather api settings</span>
+                    <span id="weather_max" class="maximum"></span>
                 </div>
-                <script type="text/javascript">
-
-                function config_weather(){
-                    var key;
-                    var city;
-                    while(key == null) {
-                        key = prompt("Please enter your openweathermap.org API-key", localStorage.getItem("weather_key"));
-                    }
-                    while(city == null) {
-                        city = prompt("Please enter your openweathermap.org city-ID", localStorage.getItem("weather_city_id"));
-                    }
-                    localStorage.setItem("weather_key", key);
-                    localStorage.setItem("weather_city_id", city);
-                    update_weather();
-                }
-                function update_weather(){
-                    var key = localStorage.getItem("weather_key");
-                    var city = localStorage.getItem("weather_city_id");
-
-                    if (key != null && city != null){
-                        $.getJSON( "http://api.openweathermap.org/data/2.5/weather?id="+city+"&APPID="+key+"&units=metric", parse_weather_response);
-                    }
-                }
-                function parse_weather_response(data){
-                    var curr_temp;
-                    var max_temp;
-                    var min_temp;
-                    //function k_to_c(k){ return k-273.15;}
-                    curr_temp = data.main.temp;
-                    max_temp = data.main.temp_max;
-                    min_temp = data.main.temp_min;
-
-                    document.getElementById("weather_curr").innerHTML = (curr_temp.toFixed(1)+" "+String.fromCharCode(176)+"C");
-                    document.getElementById("weather_max").innerHTML = (max_temp.toFixed(1)+" "+String.fromCharCode(176)+"C");
-                    document.getElementById("weather_min").innerHTML = (min_temp.toFixed(1)+" "+String.fromCharCode(176)+"C");
-                }
-                </script>
             </div>
         </div>
     </div>
-
-    <!-- init code -->
-    <script type="text/javascript">
-    $(document).ready(function() {
-        update_date();
-        init_clock();
-        update_weather();
-        update_transit();
-
-        setInterval(update_date, 60000);
-        setInterval(update_weather, 60000);
-        setInterval(update_transit, 60000);
-    });
-    </script>
 </body>
 </html>

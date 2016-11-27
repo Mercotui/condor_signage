@@ -58,10 +58,22 @@ function parse_weather_response(data){
     curr_temp = data.main.temp;
     max_temp = data.main.temp_max;
     min_temp = data.main.temp_min;
+    sun_rise = data.sys.sunrise;
+    sun_set = data.sys.sunset;
+    api_time = data.dt;
+    code = data.weather[0].id;
+
+    var icon_class="wi wi-owm-night-201";
+    if (sun_rise < api_time && api_time < sun_set){
+        var icon_class = "wi wi-owm-day-"+code;
+    } else {
+        var icon_class = "wi wi-owm-night-"+code;
+    }
 
     document.getElementById("weather_curr").innerHTML = (curr_temp.toFixed(1)+" "+String.fromCharCode(176)+"C");
     document.getElementById("weather_max").innerHTML = (max_temp.toFixed(1)+" "+String.fromCharCode(176)+"C");
     document.getElementById("weather_min").innerHTML = (min_temp.toFixed(1)+" "+String.fromCharCode(176)+"C");
+    document.getElementById("weather_ico").className = icon_class;
 }
 
 // Transit functions

@@ -7,6 +7,7 @@
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.min.js"></script>
     <script type="text/javascript" src="script.js"></script>
     <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/flipclock/0.7.8/flipclock.css" />
+    <link type="text/css" rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/weather-icons/2.0.9/css/weather-icons.min.css" />
     <link type="text/css" rel="stylesheet" href="styles.css" />
 </head>
 
@@ -40,6 +41,7 @@
         <div class="spacer">
             <div class="content" onclick="config_weather()">
                 <div class="weather">
+                    <i id="weather_ico" class="wi wi-na"></i>
                     <span id="weather_curr" class="current">CLICK HERE</span><br/>
                     <span id="weather_min" class="minimum">To edit weather api settings</span>
                     <span id="weather_max" class="maximum"></span>
